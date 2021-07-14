@@ -44,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
     private TextureView textureView1;
     private TextureView textureView2;
     private static final String TAG = MainActivity.class.getName();
+    private Handler mBackgroundHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,6 +74,7 @@ public class MainActivity extends AppCompatActivity {
         }
         tv.setText(Integer.toString(cameraIdList.length));
 
+
     }
 
 
@@ -82,7 +84,7 @@ public class MainActivity extends AppCompatActivity {
         public void onOpened(CameraDevice cameraDevice) {
             Log.d(TAG, "相机已经打开");
             //当逻辑摄像头开启后， 配置物理摄像头的参数
-            config(cameraDevice);
+            //config(cameraDevice);
         }
 
         @Override
@@ -100,7 +102,7 @@ public class MainActivity extends AppCompatActivity {
     public void openCamera() {
         HandlerThread thread = new HandlerThread("DualCamera");
         thread.start();
-        handler = new Handler(thread.getLooper());
+        mBackgroundHandler = new Handler(thread.getLooper());
         CameraManager manager = (CameraManager) this.getSystemService(Context.CAMERA_SERVICE);
         try {
             //权限检查
@@ -109,7 +111,7 @@ public class MainActivity extends AppCompatActivity {
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, 1);
                 return;
             }
-            manager.openCamera("0", cameraOpenCallBack,new Handler());
+            manager.openCamera("0", cameraOpenCallBack,mBackgroundHandler);
         } catch (CameraAccessException e) {
             e.printStackTrace();
         }
