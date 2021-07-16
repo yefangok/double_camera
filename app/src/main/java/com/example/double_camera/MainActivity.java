@@ -137,8 +137,7 @@ public class MainActivity extends AppCompatActivity {
             ////默认全部打开所有摄像头
             //mOpenBtn.setText(R.string.camera_case_btn_close);
             //mOpenBtn.setActivated(false);
-
-            openCamera();
+            //openCamera();
         }
 
         @Override
@@ -155,19 +154,19 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-    public void takePicture() {
+    public void takePicture(Camera2Information caminfo) {
         try {
-            mCaptureRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_START);
-            mCameraCaptureSession.capture(mCaptureRequestBuilder.build(), mCaptureCallback, mCameraHandler);
+            caminfo.previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_START);
+            caminfo.cameraCaptureSession.capture(caminfo.previewBuilder.build(), mCaptureCallback, caminfo.handler);
         } catch (CameraAccessException e) {
             e.printStackTrace();
         }
     }
 
     //打开相机时候的监听器，通过他可以得到相机实例，这个实例可以创建请求建造者
-    private class CameraDeviceStateCallback extends CameraDevice.StateCallback{
+    public class CameraDeviceStateCallback extends CameraDevice.StateCallback{
         private Camera2Information mcaminfo;
-        public void CameraDeviceStateCallback(Camera2Information caminfo){
+        public CameraDeviceStateCallback(Camera2Information caminfo){
             mcaminfo = caminfo;
         }
         @Override
@@ -181,7 +180,7 @@ public class MainActivity extends AppCompatActivity {
                 SurfaceTexture surfaceTexture = textureView1.getSurfaceTexture();
                 surfaceTexture.setDefaultBufferSize(320, 240);
                 Surface previewSurface = new Surface(surfaceTexture);
-                mCaptureRequest1.addTarget(Objects.requireNonNull(previewSurface));
+                mcaminfo.previewBuilder.addTarget(Objects.requireNonNull(previewSurface));
 
                 //注册摄像头
                 cameraDevice.createCaptureSession(Arrays.asList(previewSurface, mcaminfo.imageReader.getSurface()), new CameraCaptureSession.StateCallback() {
