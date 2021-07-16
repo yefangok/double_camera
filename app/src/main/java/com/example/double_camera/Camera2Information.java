@@ -11,20 +11,20 @@ import android.util.Size;
 
 public class Camera2Information {
 
-    private String camera2Id;
-    private CameraDevice cameraDevice;//相机设备
-    private CaptureRequest.Builder previewBuilder;//捕获请求(捕获请求模式:预览,拍照等)
-    private CameraCaptureSession cameraCaptureSession;//捕获会话的管理(开启或停止预览)
-    private ImageReader imageReader;//预览,拍照数据回调
+    String camera2Id;
+    CameraDevice cameraDevice;//相机设备
+    CaptureRequest.Builder previewBuilder;//捕获请求(捕获请求模式:预览,拍照等)
+    CameraCaptureSession cameraCaptureSession;//捕获会话的管理(开启或停止预览)
+    ImageReader imageReader;//预览,拍照数据回调
 
-    private int previewFormat;//预览格式
-    private Size previewSize;//预览尺寸
-    private Size pictureSize;//图片尺寸
-    private Range<Integer> previewFps;//FPS
-    private String previewOrientation;//预览方向
+    int previewFormat;//预览格式
+    Size previewSize;//预览尺寸
+    Size pictureSize;//图片尺寸
+    Range<Integer> previewFps;//FPS
+    String previewOrientation;//预览方向
 
-    private HandlerThread handlerThread;
-    private Handler handler;
+    HandlerThread handlerThread;
+    Handler handler;
 
     public String getCamera2Id() {
         return "1";
