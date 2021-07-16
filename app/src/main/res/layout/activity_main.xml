@@ -9,23 +9,23 @@
 
     <LinearLayout
         android:layout_width="wrap_content"
-        android:layout_height="600dp"
+        android:layout_height="wrap_content"
         android:dividerPadding="10dp"
-        android:orientation="vertical"
-        tools:layout_editor_absoluteX="1dp"
-        tools:layout_editor_absoluteY="202dp">
+        android:orientation="horizontal">
 
         <TextureView
             android:id="@+id/textureView1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1" />
+            android:layout_width="640dp"
+            android:layout_height="360dp"
+            android:layout_weight="1"
+            android:paddingRight="0dp" />
 
         <TextureView
             android:id="@+id/textureView2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1" />
+            android:layout_width="640dp"
+            android:layout_height="360dp"
+            android:layout_weight="1"
+            android:paddingLeft="0pt" />
     </LinearLayout>
 
     <LinearLayout
@@ -54,5 +54,11 @@
             android:text="Button"
             tools:layout_editor_absoluteX="158dp"
             tools:layout_editor_absoluteY="629dp" />
+
+        <Button
+            android:id="@+id/button2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="拍照" />
     </LinearLayout>
 </LinearLayout>

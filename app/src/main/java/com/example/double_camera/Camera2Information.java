@@ -8,14 +8,16 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.util.Range;
 import android.util.Size;
+import android.view.TextureView;
 
-public class Camera2Information {
+public class Camera2Information<textureView1> {
 
     String camera2Id;
     CameraDevice cameraDevice;//相机设备
     CaptureRequest.Builder previewBuilder;//捕获请求(捕获请求模式:预览,拍照等)
     CameraCaptureSession cameraCaptureSession;//捕获会话的管理(开启或停止预览)
     ImageReader imageReader;//预览,拍照数据回调
+    TextureView textureView;
 
     int previewFormat;//预览格式
     Size previewSize;//预览尺寸
@@ -27,6 +29,6 @@ public class Camera2Information {
     Handler handler;
 
     public String getCamera2Id() {
-        return "1";
+        return camera2Id;
     }
 }

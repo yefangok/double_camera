@@ -55,10 +55,10 @@ public class MainActivity extends AppCompatActivity {
 
     private ActivityMainBinding binding;
     private Button button1;
+    private Button button2;
     private TextureView textureView1;
     private TextureView textureView2;
     private static final String TAG = MainActivity.class.getName();
-    private CameraCaptureSession mCameraCaptureSession;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,20 +70,32 @@ public class MainActivity extends AppCompatActivity {
         // Example of a call to a native method
         TextView tv = binding.sampleText;
         tv.setText(stringFromJNI());
-
+        textureView1 = findViewById(R.id.textureView1);
+        textureView1.setRotation(270);
+        textureView2 = findViewById(R.id.textureView2);
+        textureView2.setRotation(270);
         Camera2Information caminfo1 = new Camera2Information();
         caminfo1.camera2Id = "0";
+        caminfo1.textureView = textureView1;
         Camera2Information caminfo2 = new Camera2Information();
         caminfo2.camera2Id = "1";
-        textureView1 = findViewById(R.id.textureView1);
-        textureView2 = findViewById(R.id.textureView2);
+        caminfo2.textureView = textureView2;
+
         button1 = findViewById(R.id.button1);
+        button2 = findViewById(R.id.button2);
         button1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 tv.setText("fuck");
                 openCamera(caminfo1);
                 openCamera(caminfo2);
+            }
+        });
+        button2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                takePicture(caminfo1);
+                takePicture(caminfo2);
             }
         });
 
@@ -98,6 +110,8 @@ public class MainActivity extends AppCompatActivity {
                 Size[] size2 =map.getOutputSizes(ImageFormat.JPEG);
                 Log.d(TAG, "预览尺寸：" + Arrays.toString(size1));
                 Log.d(TAG, "拍照尺寸：" + Arrays.toString(size2));
+                float[] ff = characteristics.get(CameraCharacteristics.LENS_INFO_AVAILABLE_FOCAL_LENGTHS);
+                Log.d(TAG, "焦距：" + Arrays.toString(ff));
             }
         } catch (CameraAccessException e) {
             e.printStackTrace();
@@ -109,10 +123,10 @@ public class MainActivity extends AppCompatActivity {
 
     //开启摄像头
     public void openCamera(Camera2Information caminfo) {
-        caminfo.handlerThread = new HandlerThread("DualCamera");
-        caminfo.handlerThread .start();
+        caminfo.handlerThread = new HandlerThread("DualCamera" + caminfo.getCamera2Id());
+        caminfo.handlerThread.start();
         caminfo.handler = new Handler(caminfo.handlerThread.getLooper());
-        caminfo.imageReader = ImageReader.newInstance(640, 480, ImageFormat.JPEG, 2);
+        caminfo.imageReader = ImageReader.newInstance(1280, 720, ImageFormat.JPEG, 2);
         CameraManager manager = (CameraManager) this.getSystemService(Context.CAMERA_SERVICE);
         try {
             //权限检查
@@ -138,6 +152,7 @@ public class MainActivity extends AppCompatActivity {
             //mOpenBtn.setText(R.string.camera_case_btn_close);
             //mOpenBtn.setActivated(false);
             //openCamera();
+            Log.d(TAG, Integer.toString(width)+"/"+Integer.toString(height));
         }
 
         @Override
@@ -155,9 +170,21 @@ public class MainActivity extends AppCompatActivity {
     };
 
     public void takePicture(Camera2Information caminfo) {
+
         try {
-            caminfo.previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_START);
-            caminfo.cameraCaptureSession.capture(caminfo.previewBuilder.build(), mCaptureCallback, caminfo.handler);
+            CaptureRequest.Builder captureRequestBuilder = caminfo.cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
+            captureRequestBuilder.addTarget(caminfo.imageReader.getSurface());
+            // 自动对焦
+            captureRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
+            // 自动曝光
+            captureRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH);
+            // 获取手机方向
+            //int rotation = getWindowManager().getDefaultDisplay().getRotation();
+            // 根据设备方向计算设置照片的方向
+            captureRequestBuilder.set(CaptureRequest.JPEG_ORIENTATION, 90);
+            //拍照
+            CaptureRequest mCaptureRequest = captureRequestBuilder.build();
+            caminfo.cameraCaptureSession.capture(mCaptureRequest, null, caminfo.handler);
         } catch (CameraAccessException e) {
             e.printStackTrace();
         }
@@ -165,7 +192,7 @@ public class MainActivity extends AppCompatActivity {
 
     //打开相机时候的监听器，通过他可以得到相机实例，这个实例可以创建请求建造者
     public class CameraDeviceStateCallback extends CameraDevice.StateCallback{
-        private Camera2Information mcaminfo;
+        private final Camera2Information mcaminfo;
         public CameraDeviceStateCallback(Camera2Information caminfo){
             mcaminfo = caminfo;
         }
@@ -177,13 +204,14 @@ public class MainActivity extends AppCompatActivity {
             try {
                 //配置第一个物理摄像头
                 mcaminfo.previewBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
-                SurfaceTexture surfaceTexture = textureView1.getSurfaceTexture();
+                SurfaceTexture surfaceTexture = mcaminfo.textureView.getSurfaceTexture();
                 surfaceTexture.setDefaultBufferSize(320, 240);
                 Surface previewSurface = new Surface(surfaceTexture);
                 mcaminfo.previewBuilder.addTarget(Objects.requireNonNull(previewSurface));
 
                 //注册摄像头
-                cameraDevice.createCaptureSession(Arrays.asList(previewSurface, mcaminfo.imageReader.getSurface()), new CameraCaptureSession.StateCallback() {
+                //cameraDevice.createCaptureSession(Arrays.asList(previewSurface, mcaminfo.imageReader.getSurface()), new CameraCaptureSession.StateCallback() {
+                cameraDevice.createCaptureSession(Arrays.asList(previewSurface), new CameraCaptureSession.StateCallback() {
                     @Override
                     public void onConfigured(CameraCaptureSession session) {
                         try {
